@@ -40,9 +40,9 @@ var vertexBuffer;
 var perspectiveViewUniformPointer;
 
 //ΠΡΟΣΘΕΣΤΕ ΕΔΩ ΤΗ ΔΗΛΩΣΗ ΜΙΑΣ GLOBAL ΜΕΤΑΒΛΗΤΗΣ totalZ ΓΙΑ ΤΟ ΣΥΝΟΛΙΚΟ ΥΨΟΣ Z ΤΗΣ ΚΑΜΕΡΑΣ ΚΑΙ ΑΡΧΙΚΟΠΟΙΗΣΤΕ ΤΗ ΣΕ 2
-var totalZ = 1;
+var totalZ = 2;
 //GWNIA THEASIS
-var ViewAngle=Math.PI/2;
+var ViewAngle=90*Math.PI/180;
 var colorBuffer;
 var indexBuffer;
 var totalAngle = -1;
@@ -251,11 +251,12 @@ function drawScene() {
 	var numZ = parseFloat(txtZ);
 	totalZ = numZ;
 
+    //ΓΩΝΙΑ ΘΕΑΣΗΣ
     var txtVa;
     txtVa = document.getElementById("txtVa").value;
-    var numVa = parseFloat(txtVa);
-    numVa = Math.PI/numVa;
-    ViewAngle =  numVa;
+    var numVa = parseInt(txtVa);
+    numVa = numVa * Math.PI/180;
+    ViewAngle = numVa;
 
 
     var translationMatrix = new Float32Array(16);
@@ -263,7 +264,6 @@ function drawScene() {
 	glMatrix.mat4.fromTranslation(translationMatrix,[0,0,0]);
 	gl.uniformMatrix4fv(verticesTransformUniformPointer, false, translationMatrix); 
 	gl.drawElements(gl.TRIANGLES,indexBuffer.itemCount,gl.UNSIGNED_SHORT, 0);
-
 
 }
 
@@ -308,8 +308,8 @@ function stopAnimation() {
 </canvas>
 <p>
 Βήμα γωνίας περιστροφής:<input type="text" id="stepAngleTxt" value="0.5" autocomplete="off"><br>
-Γωνία θέασης:<input type="text" id="txtVa" value="2" autocomplete="off">
-Βήμα ύψους:<input type="text" id="txtZ" value="0" autocomplete="off"> 
+Γωνία θέασης:<input type="text" id="txtVa" value="90" autocomplete="off">
+Βήμα ύψους:<input type="text" id="txtZ" value="2" autocomplete="off"> 
 
 
 <button id="startButton" onclick="startAnimation()">Ξεκίνα!</button>
