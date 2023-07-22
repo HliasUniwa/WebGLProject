@@ -8,25 +8,33 @@
 <script id="vShader" type="x-shader/x-vertex">
 attribute vec4 aVertexPosition;
 attribute vec4 aVertexColor;
+attribute vec2 aTextureCoordinates;
 uniform mat4 uVerticesTransform;
 uniform mat4 uPerspectiveViewTransform;
+
+varying vec2 vTextureCoordinates;
 
 varying vec4 vColor;
 void main() {
     gl_Position = uPerspectiveViewTransform * uVerticesTransform * aVertexPosition;
-    vColor = aVertexColor;
+    vTextureCoordinates = aTextureCoordinates;
 }
 </script>
 
 <script id="fShader" type="x-shader/x-fragment">
 precision mediump float;
+varying vec2 vTextureCoordinates;
+uniform sampler2D uSampler;
 varying vec4 vColor;
 void main() {
-    gl_FragColor = vColor;
+    gl_FragColor = texture2D(uSampler, vTextureCoordinates);
 }
 </script>
 
 <script>
+
+var bodyTexture; //texture - body
+var faceTexture; //texture - face
 
 var gl;
 var canvas;
@@ -38,8 +46,12 @@ var vertexBuffer;
 //POINTER CAMERAS
 var perspectiveViewUniformPointer;
 
-var redColorBuffer;
-var yellowColorBuffer;
+// var redColorBuffer;
+// var yellowColorBuffer;
+
+var samplerUniformPointer;
+var textureCoordinatesAttributePointer;
+
 var indexBuffer;
 var requestID = 0; 
 //rotation
@@ -110,6 +122,11 @@ function initShaders() {
     verticesTransformUniformPointer = gl.getUniformLocation(shadersProgram, "uVerticesTransform");
 
     perspectiveViewUniformPointer = gl.getUniformLocation(shadersProgram, "uPerspectiveViewTransform"); 
+
+    textureCoordinatesAttributePointer = gl.getAttribLocation(shadersProgram, "aTextureCoordinates");
+    gl.enableVertexAttribArray(textureCoordinatesAttributePointer);
+
+    samplerUniformPointer = gl.getUniformLocation(shadersProgram, "uSampler");
 }
 
 // 1 ΔΗΜΙΟΥΡΓΙΑ ΚΥΒΟΥ
@@ -159,80 +176,6 @@ function initBuffers() {
     vertexBuffer.itemSize = 3;
     vertexBuffer.itemCount = 24;
 
-    var redTriangleColors = new Float32Array([
-		1.0, 0.0, 0.0, //A
-	    0.9, 0.0, 0.0, //B
-	    0.8, 0.0, 0.0, //C
-	    0.7, 0.0, 0.0, //D
-
-		0.6, 0.0, 0.0, //E
-        0.5, 0.0, 0.0, //F
-        0.4, 0.0, 0.0, //G
-		0.3, 0.0, 0.0, //H
-
-		0.7, 0.0, 0.0,//D
-        0.8, 0.0, 0.0,//C
-        0.4, 0.0, 0.0,//G
-        0.3, 0.0, 0.0,//H
-
-		1.0, 0.0, 0.0,//A
-	    0.9, 0.0, 0.0,//B
-        0.9, 0.0, 0.0,//F
-	    0.1, 0.0, 0.0,//E
-
-		0.9, 0.0, 0.0,//B
-	    0.8, 0.0, 0.0,//C
-	    0.4, 0.0, 0.0,//G
-        0.5, 0.0, 0.0,//F
-
-		1.0, 0.0, 0.0,//A
-	    0.6, 0.0, 0.0,//D
-	    0.3, 0.0, 0.0,//H
-	    0.6, 0.0, 0.0,//E
-    ]);
-    redColorBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, redColorBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, redTriangleColors, gl.STATIC_DRAW);
-    redColorBuffer.itemSize = 3;
-    redColorBuffer.itemCount = 24;
-
-    var yellowTriangleColors = new Float32Array([
-        1.0, 1.0, 0.0, //A
-	    0.9, 0.9, 0.0, //B
-	    0.8, 0.8, 0.0, //C
-	    0.7, 0.7, 0.0, //D
-
-		0.6, 0.6, 0.0, //E
-        0.5, 0.5, 0.0, //F
-        0.4, 0.4, 0.0, //G
-		0.3, 0.3, 0.0, //H
-
-		0.7, 0.7, 0.0,//D
-        0.8, 0.8, 0.0,//C
-        0.4, 0.4, 0.0,//G
-        0.3, 0.3, 0.0,//H
-
-		1.0, 1.0, 0.0,//A
-	    0.9, 0.9, 0.0,//B
-        0.9, 0.9, 0.0,//F
-	    0.1, 0.1, 0.0,//E
-
-		0.9, 0.9, 0.0,//B
-	    0.8, 0.8, 0.0,//C
-	    0.4, 0.4, 0.0,//G
-        0.5, 0.5, 0.0,//F
-
-		1.0, 1.0, 0.0,//A
-	    0.6, 0.6, 0.0,//D
-	    0.3, 0.3, 0.0,//H
-	    0.6, 0.6, 0.0,//E
-    ]);
-    yellowColorBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, yellowColorBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, yellowTriangleColors, gl.STATIC_DRAW);
-    yellowColorBuffer.itemSize = 3;
-    yellowColorBuffer.itemCount = 24;
-
     var indexMatrix = new Uint16Array([
         0, 1, 2,  // Front face
         0, 2, 3,  // Front face
@@ -256,6 +199,112 @@ function initBuffers() {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indexMatrix, gl.STATIC_DRAW);
     indexBuffer.itemCount = 36;
+
+    faceTextureBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, faceTextureBuffer);
+    var faceTextureCoordinates=new Float32Array([
+        // top
+        1.0,  0.0,
+        1.0,  0.5,
+        0.5,  0.5,
+        0.5,  0.0,
+
+        // left
+        0.0,  0.0,
+        0.5,  0.0,
+        0.5,  0.5,
+        0.0,  0.5,
+
+        // right
+        0.0,  0.0,
+        0.5,  0.0,
+        0.5,  0.5,
+        0.0,  0.5,
+
+        // front
+        0.5,  1.0,
+        0.0,  1.0,
+        0.0,  0.5,
+        0.5,  0.5,
+
+        // back
+        0.0,  0.0,
+        0.5,  0.0,
+        0.5,  0.5,
+        0.0,  0.5,
+
+        // bottom
+        0.0,  0.0,
+        0.5,  0.0,
+        0.5,  0.5,
+        0.0,  0.5
+
+        ]);
+    gl.bufferData(gl.ARRAY_BUFFER, faceTextureCoordinates, gl.STATIC_DRAW);
+    faceTextureBuffer.itemSize = 2;
+    faceTextureBuffer.numberOfItems = 24;
+
+    bodyTextureBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, bodyTextureBuffer);
+    var bodyTextureCoordinates=new Float32Array([
+        0.0, 0.0,
+        1.0, 0.0,
+        1.0, 1.0,
+        0.0, 1.0,
+
+        0.0, 0.0,
+        1.0, 0.0,
+        1.0, 1.0,
+        0.0, 1.0,
+
+        0.0, 0.0,
+        1.0, 0.0,
+        1.0, 1.0,
+        0.0, 1.0,
+
+        0.0, 0.0,
+        1.0, 0.0,
+        1.0, 1.0,
+        0.0, 1.0,
+
+        0.0, 0.0,
+        1.0, 0.0,
+        1.0, 1.0,
+        0.0, 1.0,
+
+        0.0, 0.0,
+        1.0, 0.0,
+        1.0, 1.0,
+        0.0, 1.0
+    ]);
+
+    gl.bufferData(gl.ARRAY_BUFFER, bodyTextureCoordinates, gl.STATIC_DRAW);
+    bodyTextureBuffer.itemSize = 2;
+    bodyTextureBuffer.numberOfItems = 24;
+
+    faceTexture = gl.createTexture();
+    var faceUrl ="face.jpg" 
+    preprocessTextureImage(faceUrl, faceTexture);
+
+    bodyTexture = gl.createTexture();
+    var bodyUrl = "skin.jpg"
+    preprocessTextureImage(bodyUrl, bodyTexture);
+
+    function preprocessTextureImage(imageURL, textureObject) {
+
+	var imageObject = new Image();
+
+	imageObject.onload = function() {    
+            gl.bindTexture(gl.TEXTURE_2D, textureObject);
+            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, imageObject);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
+
+            gl.generateMipmap(gl.TEXTURE_2D);
+        };
+        imageObject.src = imageURL;	
+    }
 }
 
 function drawScene() {
@@ -270,10 +319,9 @@ function drawScene() {
     //3Γ ΘΕΣΗ ΚΑΜΕΡΑΣ
     //6 ΑΛΛΑΓΗ ΠΑΡΑΜΕΤΡΩΝ ΓΙΑ ΠΕΡΙΣΤΡΟΦΗ ΚΑΙ ΑΥΞΗΣΗ ΥΨΟΥΣ ΚΑΜΕΡΑΣ
     var viewDistXYZ = getViewDistance(viewDistance);
-    viewDistXYZ[2] = totalZ;
+    viewDistXYZ[2] = viewDistXYZ[2] + totalZ;
     viewDistXYZ[0] = viewDistXYZ[0]*Math.cos(totalAngle);
     viewDistXYZ[1] = viewDistXYZ[1]*Math.sin(totalAngle);
-
 
     //4 
     var longDistView = 20 * parseFloat(document.getElementById("viewDistance").value);
@@ -298,19 +346,22 @@ function drawScene() {
     glMatrix.mat4.multiply(pvMatrix,pMatrix,vMatrix);
 
     gl.uniformMatrix4fv(perspectiveViewUniformPointer, false, pvMatrix);
-	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT); 
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
     gl.vertexAttribPointer(vertexPositionAttributePointer, vertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
-    gl.bindBuffer(gl.ARRAY_BUFFER, redColorBuffer);
-    gl.vertexAttribPointer(vertexColorAttributePointer, redColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
 
     var translationMatrix = new Float32Array(16);
     var scaleMatrix = new Float32Array(16);
     var resultMatrix  = new Float32Array(16);
+
+// ΑΛΛΑΓΗ ΣΕ TEXTURE ΣΩΜΑΤΟΣ ΒΗΜΑ 7
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, bodyTexture);
+    gl.uniform1i(samplerUniformPointer, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, bodyTextureBuffer);
+    gl.vertexAttribPointer(textureCoordinatesAttributePointer, bodyTextureBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
 // ΒΗΜΑ 5
 
@@ -393,11 +444,6 @@ function drawScene() {
 	gl.uniformMatrix4fv(verticesTransformUniformPointer, false, resultMatrix); 
 	gl.drawElements(gl.TRIANGLES,indexBuffer.itemCount,gl.UNSIGNED_SHORT, 0);
 
-
-//ΚΙΤΡΙΝΟ ΧΡΩΜΑ
-	gl.bindBuffer(gl.ARRAY_BUFFER, yellowColorBuffer);
-	gl.vertexAttribPointer(vertexColorAttributePointer, yellowColorBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
     //ΚΟΡΜΟΣ
     glMatrix.mat4.fromTranslation(translationMatrix,[0,-1,7.5]);
 	glMatrix.mat4.fromScaling(scaleMatrix,[3,7,2.5]);
@@ -411,6 +457,13 @@ function drawScene() {
     glMatrix.mat4.multiply(resultMatrix,translationMatrix,scaleMatrix);
 	gl.uniformMatrix4fv(verticesTransformUniformPointer, false, resultMatrix); 
 	gl.drawElements(gl.TRIANGLES,indexBuffer.itemCount,gl.UNSIGNED_SHORT, 0); 
+
+// ΑΛΛΑΓΗ ΣΕ TEXTURE ΠΡΟΣΩΠΟΥ ΒΗΜΑ 7
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, faceTexture);
+    gl.uniform1i(samplerUniformPointer, 1);
+    gl.bindBuffer(gl.ARRAY_BUFFER, faceTextureBuffer);
+    gl.vertexAttribPointer(textureCoordinatesAttributePointer, faceTextureBuffer.itemSize, gl.FLOAT, false, 0, 0);
     
     //ΚΕΦΑΛΙ
     glMatrix.mat4.fromTranslation(translationMatrix,[0,6,15]);
@@ -441,13 +494,11 @@ function startAnimation() {
     requestID = window.requestAnimationFrame(animationStep);
 }
 
-// ΝΕΟΤΕΡΟ.2
 function animationStep() {
     drawScene();
     requestID = window.requestAnimationFrame(animationStep);
 }
 
-// ΝΕΟΤΕΡΟ.3
 function stopAnimation() {
     window.cancelAnimationFrame(requestID);
     requestID = 0;
