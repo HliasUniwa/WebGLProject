@@ -42,7 +42,10 @@ var redColorBuffer;
 var yellowColorBuffer;
 var indexBuffer;
 var requestID = 0; 
-
+//rotation
+var totalAngle = -1;
+//height (z)
+var totalZ = 0.01;
 function createGLContext(inCanvas) {
 var outContext = null;
 outContext = inCanvas.getContext("webgl");
@@ -257,21 +260,34 @@ function initBuffers() {
 
 function drawScene() {
 	
-    //3A ΓΩΝΙΑ ΘΕΑΣΗΣ
+    //3A ΓΩΝΙΑ ΘΕΑΣΗΣ(field of view)
     var viewAngle = parseInt(document.getElementById("viewAngle").value);
     viewAngle = viewAngle * Math.PI/180;
 
-    //3B ΟΡΘΟΓΩΝΙΑ ΑΠΟΣΤΑΣΗ
+    //3B ΟΡΘΟΓΩΝΙΑ ΑΠΟΣΤΑΣΗ(view distance)
 	var viewDistance = parseFloat(document.getElementById("viewDistance").value);
 
     //3Γ ΘΕΣΗ ΚΑΜΕΡΑΣ
-    var viewDistXYZ = getViewDistance(viewDistance);    
+    //6 ΑΛΛΑΓΗ ΠΑΡΑΜΕΤΡΩΝ ΓΙΑ ΠΕΡΙΣΤΡΟΦΗ ΚΑΙ ΑΥΞΗΣΗ ΥΨΟΥΣ ΚΑΜΕΡΑΣ
+    var viewDistXYZ = getViewDistance(viewDistance);
+    viewDistXYZ[2] = totalZ;
+    viewDistXYZ[0] = viewDistXYZ[0]*Math.cos(totalAngle);
+    viewDistXYZ[1] = viewDistXYZ[1]*Math.sin(totalAngle);
+
 
     //4 
     var longDistView = 20 * parseFloat(document.getElementById("viewDistance").value);
 
+    //Περιστροφη 6a
+	var numStepAngle = 0.5*Math.PI/180.0; 
+	totalAngle += numStepAngle;
+
+    //height value = 0.01
+    totalZ += 0.01;
+
     var pMatrix = new Float32Array(16);
-	glMatrix.mat4.perspective(pMatrix, viewAngle, 1, 0.001, longDistView);
+    //ΚΑΤΟΦΛΗ ΜΑΚΡΙΝΗΣ ΟΡΑΤΟΤΗΤΑΣ 20000
+	glMatrix.mat4.perspective(pMatrix, viewAngle, 1, 0.001, 20000);
 
     var vMatrix = new Float32Array(16);
 	glMatrix.mat4.lookAt(vMatrix,viewDistXYZ,[0,0,0],[0,0,1]);
@@ -419,6 +435,24 @@ function main() {
     drawScene();
 }
 
+
+function startAnimation() {
+    if (requestID == 0)
+    requestID = window.requestAnimationFrame(animationStep);
+}
+
+// ΝΕΟΤΕΡΟ.2
+function animationStep() {
+    drawScene();
+    requestID = window.requestAnimationFrame(animationStep);
+}
+
+// ΝΕΟΤΕΡΟ.3
+function stopAnimation() {
+    window.cancelAnimationFrame(requestID);
+    requestID = 0;
+}
+
 </script>
 
 </head>
@@ -428,9 +462,11 @@ function main() {
 </canvas>
 <p>
 <button id="reDesign" onclick="drawScene()">ΕΠΑΝΑΣΧΕΔΙΑΣΗ</button>
+<button id="startButton" onclick="startAnimation()">Ξεκίνα!</button>
+<button id="stopButton" onclick="stopAnimation()">Σταμάτα!</button>
 <br>
 Γωνία θέασης(viewAngle):<input type="text" id="viewAngle" value="90" autocomplete="off">
-Ορθογώνια Απόσταση(viewDistance):<input type="text" id="viewDistance" value="25" autocomplete="off"> <br>
+Ορθογώνια Απόσταση(viewDistance):<input type="text" id="viewDistance" value="30" autocomplete="off"> <br>
 <input type="radio" id="lft" name="camera_coord" value="LFT">
 <label for="lft">Left-Front-Top</label>
 <input type="radio" id="rft" name="camera_coord" value="RFT" checked="checked">
