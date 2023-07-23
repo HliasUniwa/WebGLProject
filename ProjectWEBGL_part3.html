@@ -35,6 +35,8 @@ void main() {
 
 var bodyTexture; //texture - body
 var faceTexture; //texture - face
+var skyboxTexture; //texture - body
+var floorTexture; //texture - face
 
 var gl;
 var canvas;
@@ -200,8 +202,7 @@ function initBuffers() {
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indexMatrix, gl.STATIC_DRAW);
     indexBuffer.itemCount = 36;
 
-    faceTextureBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, faceTextureBuffer);
+    
     var faceTextureCoordinates=new Float32Array([
         // top
         1.0,  0.0,
@@ -238,14 +239,14 @@ function initBuffers() {
         0.5,  0.0,
         0.5,  0.5,
         0.0,  0.5
-
         ]);
+    faceTextureBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, faceTextureBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, faceTextureCoordinates, gl.STATIC_DRAW);
     faceTextureBuffer.itemSize = 2;
     faceTextureBuffer.numberOfItems = 24;
+    
 
-    bodyTextureBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, bodyTextureBuffer);
     var bodyTextureCoordinates=new Float32Array([
         0.0, 0.0,
         1.0, 0.0,
@@ -277,10 +278,51 @@ function initBuffers() {
         1.0, 1.0,
         0.0, 1.0
     ]);
-
+    bodyTextureBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, bodyTextureBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, bodyTextureCoordinates, gl.STATIC_DRAW);
     bodyTextureBuffer.itemSize = 2;
     bodyTextureBuffer.numberOfItems = 24;
+
+
+	var textureCoordinates=[
+        0.0,0.0,
+        1.0,0.0,
+        1.0,1.0,
+        0.0,1.0,
+
+        0.0,0.0,
+        1.0,0.0,
+        1.0,1.0,
+        0.0,1.0,
+
+        0.0,0.0,
+        1.0,0.0,
+        1.0,1.0,
+        0.0,1.0,
+
+        0.0,1.0,
+        1.0,1.0,
+        1.0,0.0,
+        0.0,0.0,
+
+        0.0,0.0,
+        1.0,0.0,
+        1.0,1.0,
+        0.0,1.0,
+
+        0.0,0.0,
+        1.0,0.0,
+        1.0,1.0,
+        0.0,1.0,
+                        
+    ];
+    textureBuffer = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, textureBuffer);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoordinates),gl.STATIC_DRAW);  
+	textureBuffer.itemSize = 2;
+    textureBuffer.numberOfItems = 24;
+
 
     faceTexture = gl.createTexture();
     var faceUrl ="face.jpg" 
@@ -290,19 +332,27 @@ function initBuffers() {
     var bodyUrl = "skin.jpg"
     preprocessTextureImage(bodyUrl, bodyTexture);
 
+    skyboxTexture = gl.createTexture();
+    var skyboxUrl = "sky.jpg"
+    preprocessTextureImage(skyboxUrl, skyboxTexture);
+
+    floorTexture = gl.createTexture();
+    var floorUrl = "floor.jpg"
+    preprocessTextureImage(floorUrl, floorTexture);
+
     function preprocessTextureImage(imageURL, textureObject) {
 
-	var imageObject = new Image();
+        var imageObject = new Image();
 
-	imageObject.onload = function() {    
-            gl.bindTexture(gl.TEXTURE_2D, textureObject);
-            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, imageObject);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
+        imageObject.onload = function() {    
+                gl.bindTexture(gl.TEXTURE_2D, textureObject);
+                gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, imageObject);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
 
-            gl.generateMipmap(gl.TEXTURE_2D);
-        };
+                gl.generateMipmap(gl.TEXTURE_2D);
+            };
         imageObject.src = imageURL;	
     }
 }
@@ -468,6 +518,34 @@ function drawScene() {
     //ΚΕΦΑΛΙ
     glMatrix.mat4.fromTranslation(translationMatrix,[0,6,15]);
 	glMatrix.mat4.fromScaling(scaleMatrix,[3,4,2]);
+    glMatrix.mat4.multiply(resultMatrix,translationMatrix,scaleMatrix);
+	gl.uniformMatrix4fv(verticesTransformUniformPointer, false, resultMatrix); 
+	gl.drawElements(gl.TRIANGLES,indexBuffer.itemCount,gl.UNSIGNED_SHORT, 0);
+
+// ΑΛΛΑΓΗ ΣΕ TEXTURE SKYBOX ΒΗΜΑ 8
+    gl.activeTexture(gl.TEXTURE2);
+    gl.bindTexture(gl.TEXTURE_2D, skyboxTexture);
+    gl.uniform1i(samplerUniformPointer, 2);
+    gl.bindBuffer(gl.ARRAY_BUFFER, textureBuffer);
+    gl.vertexAttribPointer(textureCoordinatesAttributePointer, textureBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    
+    //SKYBOX
+    glMatrix.mat4.fromTranslation(translationMatrix,[0,0,0.0]);
+	glMatrix.mat4.fromScaling(scaleMatrix,[1000,1000,1000]);
+    glMatrix.mat4.multiply(resultMatrix,translationMatrix,scaleMatrix);
+	gl.uniformMatrix4fv(verticesTransformUniformPointer, false, resultMatrix); 
+	gl.drawElements(gl.TRIANGLES,indexBuffer.itemCount,gl.UNSIGNED_SHORT, 0);
+
+// ΑΛΛΑΓΗ ΣΕ TEXTURE ΠΑΤΩΜΑΤΟΣ ΒΗΜΑ 8
+    gl.activeTexture(gl.TEXTURE3);
+    gl.bindTexture(gl.TEXTURE_2D, floorTexture);
+    gl.uniform1i(samplerUniformPointer, 3);
+    gl.bindBuffer(gl.ARRAY_BUFFER, textureBuffer);
+    gl.vertexAttribPointer(textureCoordinatesAttributePointer, textureBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+    //ΠΑΤΩΜΑ
+    glMatrix.mat4.fromTranslation(translationMatrix,[0,0,-0.2]);
+	glMatrix.mat4.fromScaling(scaleMatrix,[30,30,0.00]);
     glMatrix.mat4.multiply(resultMatrix,translationMatrix,scaleMatrix);
 	gl.uniformMatrix4fv(verticesTransformUniformPointer, false, resultMatrix); 
 	gl.drawElements(gl.TRIANGLES,indexBuffer.itemCount,gl.UNSIGNED_SHORT, 0);
