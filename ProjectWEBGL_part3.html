@@ -33,10 +33,10 @@ void main() {
 
 <script>
 
-var bodyTexture; //texture - body
-var faceTexture; //texture - face
-var skyboxTexture; //texture - body
-var floorTexture; //texture - face
+var bodyTexture;
+var faceTexture;
+var skyboxTexture;
+var floorTexture; 
 
 var gl;
 var canvas;
@@ -47,9 +47,6 @@ var verticesTransformUniformPointer;
 var vertexBuffer;
 //POINTER CAMERAS
 var perspectiveViewUniformPointer;
-
-// var redColorBuffer;
-// var yellowColorBuffer;
 
 var samplerUniformPointer;
 var textureCoordinatesAttributePointer;
@@ -135,37 +132,32 @@ function initShaders() {
 function initBuffers() {
     var edgeSize = 1;
     var triangleVertices = new Float32Array([
-        // Top 
+
         -edgeSize, edgeSize, -edgeSize,   
 		-edgeSize, edgeSize, edgeSize,    
 		edgeSize, edgeSize, edgeSize,     
 		edgeSize, edgeSize, -edgeSize,    
 
-		// Left
 		-edgeSize, edgeSize, edgeSize,    
 		-edgeSize, -edgeSize, edgeSize,   
 		-edgeSize, -edgeSize, -edgeSize,  
 		-edgeSize, edgeSize, -edgeSize,   
 
-		// Right
 		edgeSize, edgeSize, edgeSize,    
 		edgeSize, -edgeSize, edgeSize,   
 		edgeSize, -edgeSize, -edgeSize,  
 		edgeSize, edgeSize, -edgeSize,   
 
-		// Front
 		edgeSize, edgeSize, edgeSize,    
 		edgeSize, -edgeSize, edgeSize,    
 		-edgeSize, -edgeSize, edgeSize,    
 		-edgeSize, edgeSize, edgeSize,    
 
-		// Back
 		edgeSize, edgeSize, -edgeSize,    
 		edgeSize, -edgeSize, -edgeSize,    
 		-edgeSize, -edgeSize, -edgeSize,    
 		-edgeSize, edgeSize, -edgeSize,    
 
-		// Bottom
 		-edgeSize, -edgeSize, -edgeSize,   
 		-edgeSize, -edgeSize, edgeSize,    
 		edgeSize, -edgeSize, edgeSize,     
@@ -179,23 +171,23 @@ function initBuffers() {
     vertexBuffer.itemCount = 24;
 
     var indexMatrix = new Uint16Array([
-        0, 1, 2,  // Front face
-        0, 2, 3,  // Front face
+        0, 1, 2, 
+        0, 2, 3, 
 
-        5, 4, 6,  // Back face
-        6, 4, 7,  // Back face
+        5, 4, 6, 
+        6, 4, 7, 
 
-        8, 9, 10,  // Top face
-        8, 10, 11,  // Top face
+        8, 9, 10,  
+        8, 10, 11, 
 
-        12, 13, 14,  // Bottom face
-        15, 14, 12,  // Bottom face
+        12, 13, 14,
+        15, 14, 12,
 
-        16, 17, 18,  // Right face
-        16, 18, 19,  // Right face
+        16, 17, 18,
+        16, 18, 19,
 
-        21, 20, 22,  // Left face
-        22, 20, 23,  // Left face
+        21, 20, 22,
+        22, 20, 23,
     ]);
     indexBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);

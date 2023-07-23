@@ -113,37 +113,32 @@ function initShaders() {
 function initBuffers() {
     var edgeSize = 1;
     var triangleVertices = new Float32Array([
-        // Top 
+
         -edgeSize, edgeSize, -edgeSize,   
 		-edgeSize, edgeSize, edgeSize,    
 		edgeSize, edgeSize, edgeSize,     
 		edgeSize, edgeSize, -edgeSize,    
 
-		// Left
 		-edgeSize, edgeSize, edgeSize,    
 		-edgeSize, -edgeSize, edgeSize,   
 		-edgeSize, -edgeSize, -edgeSize,  
 		-edgeSize, edgeSize, -edgeSize,   
 
-		// Right
 		edgeSize, edgeSize, edgeSize,    
 		edgeSize, -edgeSize, edgeSize,   
 		edgeSize, -edgeSize, -edgeSize,  
 		edgeSize, edgeSize, -edgeSize,   
 
-		// Front
 		edgeSize, edgeSize, edgeSize,    
 		edgeSize, -edgeSize, edgeSize,    
 		-edgeSize, -edgeSize, edgeSize,    
 		-edgeSize, edgeSize, edgeSize,    
 
-		// Back
 		edgeSize, edgeSize, -edgeSize,    
 		edgeSize, -edgeSize, -edgeSize,    
 		-edgeSize, -edgeSize, -edgeSize,    
 		-edgeSize, edgeSize, -edgeSize,    
 
-		// Bottom
 		-edgeSize, -edgeSize, -edgeSize,   
 		-edgeSize, -edgeSize, edgeSize,    
 		edgeSize, -edgeSize, edgeSize,     
@@ -157,35 +152,35 @@ function initBuffers() {
     vertexBuffer.itemCount = 24;
 
     var redTriangleColors = new Float32Array([
-		1.0, 0.0, 0.0, //A
-	    0.9, 0.0, 0.0, //B
-	    0.8, 0.0, 0.0, //C
-	    0.7, 0.0, 0.0, //D
+		1.0, 0.0, 0.0,
+	    0.9, 0.0, 0.0,
+	    0.8, 0.0, 0.0,
+	    0.7, 0.0, 0.0,
 
-		0.6, 0.0, 0.0, //E
-        0.5, 0.0, 0.0, //F
-        0.4, 0.0, 0.0, //G
-		0.3, 0.0, 0.0, //H
+		0.6, 0.0, 0.0,
+        0.5, 0.0, 0.0,
+        0.4, 0.0, 0.0,
+		0.3, 0.0, 0.0,
 
-		0.7, 0.0, 0.0,//D
-        0.8, 0.0, 0.0,//C
-        0.4, 0.0, 0.0,//G
-        0.3, 0.0, 0.0,//H
+		0.7, 0.0, 0.0,
+        0.8, 0.0, 0.0,
+        0.4, 0.0, 0.0,
+        0.3, 0.0, 0.0,
 
-		1.0, 0.0, 0.0,//A
-	    0.9, 0.0, 0.0,//B
-        0.9, 0.0, 0.0,//F
-	    0.1, 0.0, 0.0,//E
+		1.0, 0.0, 0.0,
+	    0.9, 0.0, 0.0,
+        0.9, 0.0, 0.0,
+	    0.1, 0.0, 0.0,
 
-		0.9, 0.0, 0.0,//B
-	    0.8, 0.0, 0.0,//C
-	    0.4, 0.0, 0.0,//G
-        0.5, 0.0, 0.0,//F
+		0.9, 0.0, 0.0,
+	    0.8, 0.0, 0.0,
+	    0.4, 0.0, 0.0,
+        0.5, 0.0, 0.0,
 
-		1.0, 0.0, 0.0,//A
-	    0.6, 0.0, 0.0,//D
-	    0.3, 0.0, 0.0,//H
-	    0.6, 0.0, 0.0,//E
+		1.0, 0.0, 0.0,
+	    0.6, 0.0, 0.0,
+	    0.3, 0.0, 0.0,
+	    0.6, 0.0, 0.0,
     ]);
     redColorBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, redColorBuffer);
@@ -194,35 +189,35 @@ function initBuffers() {
     redColorBuffer.itemCount = 24;
 
     var yellowTriangleColors = new Float32Array([
-        1.0, 1.0, 0.0, //A
-	    0.9, 0.9, 0.0, //B
-	    0.8, 0.8, 0.0, //C
-	    0.7, 0.7, 0.0, //D
+        1.0, 1.0, 0.0,
+	    0.9, 0.9, 0.0,
+	    0.8, 0.8, 0.0,
+	    0.7, 0.7, 0.0,
 
-		0.6, 0.6, 0.0, //E
-        0.5, 0.5, 0.0, //F
-        0.4, 0.4, 0.0, //G
-		0.3, 0.3, 0.0, //H
+		0.6, 0.6, 0.0,
+        0.5, 0.5, 0.0,
+        0.4, 0.4, 0.0,
+		0.3, 0.3, 0.0,
 
-		0.7, 0.7, 0.0,//D
-        0.8, 0.8, 0.0,//C
-        0.4, 0.4, 0.0,//G
-        0.3, 0.3, 0.0,//H
+		0.7, 0.7, 0.0,
+        0.8, 0.8, 0.0,
+        0.4, 0.4, 0.0,
+        0.3, 0.3, 0.0,
 
-		1.0, 1.0, 0.0,//A
-	    0.9, 0.9, 0.0,//B
-        0.9, 0.9, 0.0,//F
-	    0.1, 0.1, 0.0,//E
+		1.0, 1.0, 0.0,
+	    0.9, 0.9, 0.0,
+        0.9, 0.9, 0.0,
+	    0.1, 0.1, 0.0,
 
-		0.9, 0.9, 0.0,//B
-	    0.8, 0.8, 0.0,//C
-	    0.4, 0.4, 0.0,//G
-        0.5, 0.5, 0.0,//F
+		0.9, 0.9, 0.0,
+	    0.8, 0.8, 0.0,
+	    0.4, 0.4, 0.0,
+        0.5, 0.5, 0.0,
 
-		1.0, 1.0, 0.0,//A
-	    0.6, 0.6, 0.0,//D
-	    0.3, 0.3, 0.0,//H
-	    0.6, 0.6, 0.0,//E
+		1.0, 1.0, 0.0,
+	    0.6, 0.6, 0.0,
+	    0.3, 0.3, 0.0,
+	    0.6, 0.6, 0.0,
     ]);
     yellowColorBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, yellowColorBuffer);
@@ -231,23 +226,23 @@ function initBuffers() {
     yellowColorBuffer.itemCount = 24;
 
     var indexMatrix = new Uint16Array([
-        0, 1, 2,  // Front face
-        0, 2, 3,  // Front face
+        0, 1, 2, 
+        0, 2, 3, 
 
-        5, 4, 6,  // Back face
-        6, 4, 7,  // Back face
+        5, 4, 6, 
+        6, 4, 7, 
 
-        8, 9, 10,  // Top face
-        8, 10, 11,  // Top face
+        8, 9, 10,  
+        8, 10, 11, 
 
-        12, 13, 14,  // Bottom face
-        15, 14, 12,  // Bottom face
+        12, 13, 14,
+        15, 14, 12,
 
-        16, 17, 18,  // Right face
-        16, 18, 19,  // Right face
+        16, 17, 18,
+        16, 18, 19,
 
-        21, 20, 22,  // Left face
-        22, 20, 23,  // Left face
+        21, 20, 22,
+        22, 20, 23,
     ]);
     indexBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
